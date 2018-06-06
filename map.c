@@ -30,25 +30,53 @@ static void map_apply_elems_internal(struct map_node *node, void (*function)(voi
  * If a new mapping is inserted, the supplied key must be duplicated.
  */
 
-struct map_node *map_insert_internal(struct map_node *node, const char *key, void *value, int *result)
-{
+struct map_node *map_insert_internal(struct map_node *node, const char *key,
+  void *value, int *result) {
+  //node is pointer to root map_node (if map is empty, node will be NULL)
+  //key is new key to be inserted
+  //value is the value the new key should be mapped to
+  //if key is already found in the tree, value is left unused
+  //*result holds the result of the insertion (success: 1)
+  //return new root node of map
+  if (node == NULL) {
+    struct map_node *newNode = map_alloc_node();
+    newNode->key = clone(key);
+    newNode->value = value;
+    newNode->left = NULL;
+    newNode->right = NULL;
+    *result = 1;
+    return newNode;
+  } else {
+      int comparison = strcmp(key, node->key);
+      if (comparison == 0) {
+        fprintf(stderr, "Tried to insert a key (%s) that already exists. Map not updated.\n", key);
+      } else if (comparison < 0) {
+        node->left = map_insert_internal(node->left, key, value, result);
+      } else if (comparison > 0) {
+        node->right = map_insert_internal(node->right, key, value, result);
+      }
+      return node;
+      }
+  }
 
- /* YOU SHOULD DELETE THE CONTENTS OF THIS FUNCTION AND REPLACE IT WITH
-  * YOUR ANSWER TO PART 2, QUESTION 1.
-  */
-
-  fprintf(stderr, "map_insert_internal() unimplemented.\n");
-  return NULL;
-}
 
 
 /* Applies the given function pointer to every *value* in the map */
 
 void map_apply_elems(struct map *m, void (*function)(void *))
 {
- /* YOU SHOULD DELETE THE CONTENTS OF THIS FUNCTION AND REPLACE IT WITH
-  * YOUR ANSWER TO PART 3, QUESTION 1.
-  */
+  assert(m != NULL);
+  map_apply_elems_internal(m->root, function);
+}
+
+void map_apply_elems_internal(struct map_node *node, void (*function)(void *)) {
+  if (node == NULL) {
+    return;
+  } else {
+    map_apply_elems_internal(node->left, function);
+    map_apply_elems_internal(node->right, function);
+    function(node->value);
+  }
 }
 
 

@@ -12,6 +12,10 @@
 char *empty_string(void)
 {
   char *emptyString = malloc(sizeof(char));
+  if (emptyString == NULL) {
+    perror("empty_string");
+    exit(EXIT_FAILURE);
+  }
   *emptyString = '\0';
 
   return emptyString;
@@ -22,8 +26,14 @@ char *empty_string(void)
 
 char *clone(const char *str)
 {
-  char *copy = malloc((strlen(str)+1) * sizeof(char));
-  memcpy(copy, str, strlen(str));
+  assert(str != NULL);
+  int stringLength = (strlen(str) + 1) * sizeof(char);
+  char *copy = malloc(stringLength);
+  if (copy == NULL) {
+    perror("clone");
+    exit(EXIT_FAILURE);
+  }
+  memcpy(copy, str, stringLength);
 
   return copy;
 }
@@ -36,13 +46,23 @@ char *clone(const char *str)
 
 char *push_string(char *current, const char *append)
 {
-  int currLen = strlen(current);
-  int appLen = strlen(append);
-  char *newString = malloc((currLen+appLen) * sizeof(char));
-  memcpy(newString, current, currLen);
-  memcpy((newString+currLen), append, appLen);
+  assert(current != NULL);
+  assert(append != NULL);
 
-  return newString;
+  int currLen = strlen(current) * sizeof(char);
+  int appLen = strlen(append) * sizeof(char);
+  int resultLen = currLen + appLen;
+  current = realloc(current, resultLen);
+  if (current == NULL) {
+    perror("push string");
+    exit(EXIT_FAILURE);
+  }
+  for (int i = currLen; i < resultLen; i += sizeof(char)) {
+    current[i] = append[i-currLen];
+  }
+  //memcpy(current+currLen, append, appLen);
+
+  return current;
 }
 
 
